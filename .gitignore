@@ -5,3 +5,4 @@
 .venv
 package
 package.zip
+.DS_Store
