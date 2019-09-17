@@ -7,7 +7,7 @@ RUN yum install -y python37
 RUN yum install -y zip && \
     python3 -m pip install pip-tools
 
-RUN yum install make
+RUN yum install -y make
 
 # required to make pip-compile work
 ENV LC_ALL=en_US.utf8
