@@ -47,6 +47,9 @@ SSH_DIR = os.getenv('SSH_DIR')
 # filename mask used for the remote file
 SSH_FILENAME = os.getenv('SSH_FILENAME', 'data_{current_date}')
 
+# take the object name from the key
+if '/' in SSH_FILENAME:
+    SSH_FILENAME = SSH_FILENAME.rsplit('/',1)[1]
 
 def on_trigger_event(event, context):
     """
