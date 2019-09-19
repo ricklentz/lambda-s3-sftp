@@ -45,11 +45,9 @@ assert SSH_PASSWORD or SSH_PRIVATE_KEY, "Missing SSH_PASSWORD or SSH_PRIVATE_KEY
 SSH_PORT = int(os.getenv('SSH_PORT', 22))
 SSH_DIR = os.getenv('SSH_DIR')
 # filename mask used for the remote file
-SSH_FILENAME = os.getenv('SSH_FILENAME', 'data_{current_date}')
+TARGET_FILENAME = os.getenv('TARGET_FILENAME', 'data_{current_date}')
+SSH_FILENAME = os.getenv('SSH_FILENAME', TARGET_FILENAME)
 
-# take the object name from the key
-if '/' in SSH_FILENAME:
-    SSH_FILENAME = SSH_FILENAME.rsplit('/',1)[1]
 
 def on_trigger_event(event, context):
     """
@@ -102,6 +100,10 @@ def on_trigger_event(event, context):
             filename = sftp_filename(SSH_FILENAME, s3_file)
             bucket = s3_file.bucket_name
             contents = ''
+            # log before copy contents
+            for entry in sftp_client.listdir_attr('/'):
+                mode = entry.st_mode
+                logger.info(entry.filename)
             try:
                 logger.info(f"S3-SFTP: Transferring S3 file '{s3_file.key}'")
                 transfer_file(sftp_client, s3_file, filename)
@@ -113,6 +115,11 @@ def on_trigger_event(event, context):
             archive_file(bucket=bucket, filename=filename, contents=contents)
             logger.info(f"S3-SFTP: Deleting S3 file '{s3_file.key}'.")
             delete_file(s3_file)
+
+            # log after copy contents
+            for entry in sftp_client.listdir_attr('/'):
+                mode = entry.st_mode
+                logger.info(entry.filename)
 
 
 def connect_to_sftp(hostname, port, username, password, pkey):
